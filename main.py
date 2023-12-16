@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.sparse as sps
 import matplotlib.pyplot as plt
+import matplotlib.tri as tri
 import ReadData
 from solver import *
 
@@ -41,6 +42,18 @@ def main():
     for i in range(np.size(uNodal,0)): 
         uMagnitude[i] = np.sqrt(uNodal[i][0]**2 + uNodal[i][1]**2)
 
+
+    Sigma = Stress(Nodals,EleNo,DOF,E,u)
+
+    principal, vonMisses = Principal_Equivalent(Sigma)
+
+    visulalizeDisplacement(Nodals,uNodal,EleNo,uMagnitude)
+    visualizeStress(Nodals,EleNo,vonMisses)
+    return np.max(abs(Sigma))
+
+
+def visulalizeDisplacement(Nodals, uNodal,EleNo,uMagnitude,):
+    # arrow visualization
     scaleValue = 10
     plt.quiver(Nodals[:,0],Nodals[:,1], scaleValue*uNodal[:,0],scaleValue*uNodal[:,1],angles='xy',scale_units='xy',scale=1)
     plt.xlim([-40,600])
@@ -52,11 +65,34 @@ def main():
     plt.scatter(Nodals[:,0]+scaleValue*uNodal[:,0], Nodals[:,1]+scaleValue*uNodal[:,1],s=50,c=barva)
     plt.show()
 
-    Sigma = Stress(Nodals,EleNo,DOF,E,u)
+    # Node colors visualization
+    x,y = Nodals.T
+    triangulation = tri.Triangulation(x,y,EleNo-1)
+    # plot the contours
+    plt.tricontourf(triangulation, uMagnitude)
+    plt.triplot(triangulation,'k-')
+    plt.colorbar()
+    plt.axis('equal')
+    plt.show()
 
-    Principal_Equivalent(Sigma)
 
-    return np.max(abs(Sigma))
+def visualizeStress(Nodals,EleNo,vonMisses):
+    # Von misses visualization averaged
+    stressAtNodes = np.zeros((np.size(Nodals,0)))
+    numOfAddedValuesAtNode = np.zeros((np.size(Nodals,0)))
+
+    for i in range(np.size(EleNo,0)):
+        stressAtNodes[EleNo[i]-1] += vonMisses[i]
+        numOfAddedValuesAtNode[EleNo[i]-1] += 1 
+    Average_node_stress = stressAtNodes / numOfAddedValuesAtNode
+
+    x,y = Nodals.T
+    triangulation = tri.Triangulation(x,y,EleNo-1)
+    plt.tricontourf(triangulation, Average_node_stress)
+    plt.triplot(triangulation,'k-')
+    plt.colorbar()
+    plt.axis('equal')
+    plt.show()
 
 
 if __name__ == '__main__':

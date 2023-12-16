@@ -160,3 +160,11 @@ def Principal_Equivalent(Sigma):
     # Von-Misses
     for i in range(np.size(res,0)):
         sigmaVM[i] = np.sqrt(res[i][0]**2+res[i][1]**2-res[i][0]*res[i][1])
+
+    np.set_printoptions(suppress=True,precision=2)
+    #print(min(res[:,0]))
+    #for i in res:
+    #    print(i[0] < i[1])
+    return res, sigmaVM
+    
+    
