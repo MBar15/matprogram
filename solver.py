@@ -40,8 +40,6 @@ def ReadBulkDAT(name="bulk.dat"):
 
     return Nod,EleNo,FixNod,ForceNod
 
-
-
 def Setup():
     """setups and accordingly prepares the problem"""
     # Material constants
@@ -79,7 +77,7 @@ def Setup():
     return {'Young':E,'Poisson': nu,'Nodals':Nodals,'EleNo':EleNo,'DOF':DOF,'nDOF':nDOF,'FreeDOF':FreeDOF,'Sila':F,'Thickness':t}
 
 def StiffnessCST(Nodal,E,nu,t):
-    D, B, A =CST_matrices(Nodal)
+    D, B, A =CST_matrices(Nodal,E,nu)
     k = A*t* np.transpose(B) @ D @ B
 
     return k
@@ -100,20 +98,16 @@ def GlobalStiffness(Nodals,EleNo,DOF,nDOF,E,nu,t):
         
     return (K+K.T)/2
 
-
-def Stress(Nodals,EleNo,DOF,E,u): #---------------------------------------
+def Stress(Nodals,EleNo,DOF,E,nu,u): #---------------------------------------
     Sigma = np.zeros((np.size(EleNo,0),3))
     for i in np.arange(0,np.size(EleNo,0)):
         uEGlobal = u[DOF[i,:]]
-        D, B, A = CST_matrices(Nodals[EleNo[i,:]-1,:])
+        D, B, A = CST_matrices(Nodals[EleNo[i,:]-1,:],E,nu)
         Sigma[i,:] =  (D@(B @ uEGlobal)).reshape([1,3])
 
     return Sigma
 
-
-def CST_matrices(Nodal):
-    E = 2.1e5
-    nu = 0.3
+def CST_matrices(Nodal,E,nu):
     D = E/(1-nu**2) * np.array([
                                 [1,nu,0],
                                 [nu,1,0],
@@ -142,7 +136,6 @@ def CST_matrices(Nodal):
                             [c1,b1,c2,b2,c3,b3]
     ])
 
-
     return D, B, A
 
 def Principal_Equivalent(Sigma):
@@ -168,5 +161,3 @@ def Principal_Equivalent(Sigma):
     #for i in res:
     #    print(i[0] < i[1])
     return res, sigmaVM
-    
-    
