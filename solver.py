@@ -162,7 +162,9 @@ def Principal_Equivalent(Sigma):
         sigmaVM[i] = np.sqrt(res[i][0]**2+res[i][1]**2-res[i][0]*res[i][1])
 
     np.set_printoptions(suppress=True,precision=2)
-    #print(min(res[:,0]))
+    print(min(res[:,1]),max(res[:,1]))
+    print(min(res[:,0]),max(res[:,0]))
+    print(min(sigmaVM),max(sigmaVM))
     #for i in res:
     #    print(i[0] < i[1])
     return res, sigmaVM
